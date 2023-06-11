@@ -91,12 +91,12 @@ def get_argument_parser():
   parser.add_argument('--wav_path', type=str, default='audio_samples/pmta.wav')
   return parser
 
-def plt_imshow(npimg, title=None):
+def plt_imshow(npimg, title=None, filename=None):
   plt.figure(figsize=(20, 10))
   plt.imshow(npimg, aspect='auto', origin='lower', interpolation='nearest')
   if title is not None:
     plt.title(title)
-    plt.savefig(f'transcribed_sample_results/{title}_{audio_path.stem}.png')
+    plt.savefig(f'transcribed_sample_results/{title}_{filename}.png')
   
 
 if __name__ == "__main__":
@@ -131,7 +131,7 @@ if __name__ == "__main__":
   for idx in onset_idx.squeeze():
     onset_pred_cleaned[idx] = velocity_pred.squeeze()[idx]
 
-  plt_imshow(onset_pred_cleaned.cpu().detach().numpy().T, title='onset_pred_cleaned')
+  plt_imshow(onset_pred_cleaned.cpu().detach().numpy().T, title='onset_pred_cleaned', filename=audio_path.stem)
 
   aggregate_factor = onset_pred_cleaned.shape[0] // 128
   db_mel_spec_cnvtd = reducing_time_resolution(onset_pred_cleaned.T, aggregate_factor, 128) # 128 x timestep
@@ -147,7 +147,7 @@ if __name__ == "__main__":
   for idx, row in enumerate(denoised_drum_roll.cpu().detach().numpy()):
     densed_drumroll[idx] = Dense_onsets(row)
 
-  plt_imshow(densed_drumroll, title='densed_drumroll')
+  plt_imshow(densed_drumroll, title='densed_drumroll', filename=audio_path.stem)
 
   with open(f'transcribed_sample_results/{audio_path.stem}.pkl', 'wb') as f:
     pickle.dump(densed_drumroll[:,:64], f)
