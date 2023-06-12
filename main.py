@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 import gradio as gr
 import numpy as np
@@ -7,12 +8,19 @@ from timeit import default_timer as timer
 from model_zoo import RNNModel_onset, RNNModel_velocity
 from transcription import Dense_onsets, SpecConverter, denoise, high_freq_content, plt_imshow, reducing_time_resolution
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+    
+    
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = torch.load("torch_efficientnet_fold2_CNN.pth", map_location=torch.device('cpu'))
-LABELS = [
-    "Cello", "Clarinet", "Flute", "Acoustic Guitar", "Electric Guitar", "Organ", "Piano", "Saxophone", "Trumpet", "Violin", "Voice"
-]
 example_list = [
     "audio_samples/pmta.wav", 
     "audio_samples/pmtati.wav", 
@@ -76,6 +84,10 @@ def predict(audio_path):
     # return pred_labels_and_probs, pred_time
     return dense_image, onset_image, pred_time
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--share', type=str2bool, default='False')
+args = parser.parse_args()
+
 demo = gr.Interface(fn=predict,
                     inputs=gr.Audio(type="filepath"),
                     outputs=[gr.Image(label="densed_drumroll"),
@@ -85,4 +97,4 @@ demo = gr.Interface(fn=predict,
                     cache_examples=False
                     )
 
-demo.launch(debug=False)
+demo.launch(debug=False, share=args.share)
