@@ -2,3 +2,4 @@ torch
 torchaudio
 librosa
 matplotlib
+gradio

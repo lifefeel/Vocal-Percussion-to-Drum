@@ -1,5 +1,6 @@
 # Custom Rules
 models/*
+transcribed_sample_results/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -10,6 +10,8 @@
 
 ## 환경
 
+### 일반
+
 git 받아오기
 
 ```bash
@@ -26,9 +28,18 @@ source myenv/bin/activate
 
 Python 패키지 설치
 
-```
+```bash
 pip install -r requirements.txt
 ```
+
+### 모델 파일
+
+모델 파일은 `models` 경로에 다운 받아서 넣습니다. 실행을 위해서는 아래의 파일들이 있어야 합니다.
+
+- models/onset_model_noQZ.pt
+- models/velocity_model_noQZ.pt
+
+
 
 ## 실행
 
@@ -64,4 +75,3 @@ Running on public URL: https://38eca9efbeb6c9b501.gradio.live
 
 This share link expires in 72 hours. For free permanent hosting and GPU upgrades, run `gradio deploy` from Terminal to deploy to Spaces (https://huggingface.co/spaces)
 ```
-
