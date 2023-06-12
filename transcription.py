@@ -109,8 +109,8 @@ if __name__ == "__main__":
   velocity_model = RNNModel_velocity(num_nmels=128, hidden_size=128).to(device)
 
   # load model
-  onset_model.load_state_dict(torch.load('onset_model_noQZ.pt'))
-  velocity_model.load_state_dict(torch.load('velocity_model_noQZ.pt'))
+  onset_model.load_state_dict(torch.load('models/onset_model_noQZ.pt'))
+  velocity_model.load_state_dict(torch.load('models/velocity_model_noQZ.pt'))
 
   spec_converter = SpecConverter(sr=44100, n_fft=512, hop_length=128, n_mels=128)
 
