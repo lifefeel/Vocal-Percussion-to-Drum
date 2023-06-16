@@ -1,9 +1,18 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import pretty_midi
+import torch 
 
 def plot_pianoroll(x, pred, out_file_pth=None):
-  fig, ax = plt.subplots(3, 1, figsize=(15, 10))
+  plt.rcParams['image.interpolation'] = 'nearest'
+  plt.rcParams['image.aspect'] = 'auto'
+  plt.rcParams['image.origin'] = 'lower'
+  x = x[0]
+  assert x.shape == torch.Size([4, 64])
+  pred = pred[0]
+  assert pred.shape == torch.Size([9, 64])
+
+  fig, ax = plt.subplots(2, 1, figsize=(15, 10))
   #dataset.paper_mapping_pitch, dataset.paper_idx2pitch, dataset.paper_mapping_inst, dataset.paper_idx2pitch_for_x
   ax[0].imshow(x)
   ax[0].set_ylabel('Input')
@@ -18,7 +27,7 @@ def plot_pianoroll(x, pred, out_file_pth=None):
   ax[1].set_yticklabels(['Bass','Snare','Closed Hi-Hat','High Floor Tom','Open Hi-Hat','Low-Mid Tom','Crash Cymbal','High Tom','Ride Cymbal'])
 
   plt.subplots_adjust(wspace=0.9, hspace=0.5)
-  plt.save(out_file_pth)
+  plt.savefig(out_file_pth)
   plt.close()
   
 def get_nine_midi(onset, val, bpm, threshold = 0.5):
@@ -50,6 +59,9 @@ def get_nine_midi(onset, val, bpm, threshold = 0.5):
   instrument = pretty_midi.Instrument(program=0, is_drum=True)
   
   onset = (onset >= threshold).float()
+  
+  onset = onset[0].numpy()
+  val = val[0].numpy()
   
   for pitch in range(len(onset)):
     for idx, (onoff, velocity) in enumerate(zip(onset[pitch], val[pitch])):
