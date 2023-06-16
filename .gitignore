@@ -1,6 +1,7 @@
 # Custom Rules
 models/*
 transcribed_sample_results/*
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
