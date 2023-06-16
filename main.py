@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torchaudio
 from timeit import default_timer as timer
-from infer_util import plot_pianoroll
+from infer_util import get_nine_midi, plot_pianoroll
 from model import drum_generation_model
 from model_zoo import RNNModel_onset, RNNModel_velocity
 from transcription import Dense_onsets, SpecConverter, denoise, high_freq_content, plt_imshow, reducing_time_resolution
@@ -112,7 +112,12 @@ def generate(x):
     saved_image = 'transcribed_sample_results/das.png'
     plot_pianoroll(x_reshape.permute(0,2,1), vel_outputs * onset_pred, out_file_pth=saved_image) 
     
-    return saved_image
+    midi = get_nine_midi(onset = onset_outputs, val = vel_outputs, bpm = bpm ) 
+    #결과값을 midi로 저장합니다. 모델이 예측한걸 그대로 넣어주시면 됩니다. bpm의 경우 기본 120입니다.
+    saved_midi = 'transcribed_sample_results/test.mid'
+    midi.write(saved_midi)
+    
+    return saved_image, gr.File.update(value=saved_midi, visible=True)
     
 parser = argparse.ArgumentParser()
 parser.add_argument('--share', type=str2bool, default='False')
@@ -134,6 +139,7 @@ with gr.Blocks() as demo:
     gr.Markdown("""## Generation""")
     generate_button = gr.Button(value="Generate")
     generated_image = gr.Image(label="generated_drumroll")
+    midi_file = gr.File(label="generated_midi", visible=False)
     
     transcription_output = gr.State()
     
@@ -141,6 +147,6 @@ with gr.Blocks() as demo:
     # 버튼 클릭 이벤트
     #
     run_button.click(fn=transcribe, inputs=[input_audio, transcription_output], outputs=[dense_image, onset_image, time_label, transcription_output])
-    generate_button.click(fn=generate, inputs=transcription_output, outputs=generated_image)
+    generate_button.click(fn=generate, inputs=transcription_output, outputs=[generated_image, midi_file])
 
     demo.launch(debug=False, share=args.share)
