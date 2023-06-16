@@ -49,10 +49,12 @@ onset_model.load_state_dict(torch.load('models/onset_model_noQZ.pt'))
 velocity_model.load_state_dict(torch.load('models/velocity_model_noQZ.pt'))
 
 bpm = 120
-style = 'rock'
+
 style2idx = {'gospel': 0, 'blues': 1,'afrobeat': 2,'jazz': 3,'country': 4,'funk': 5,'rock': 6,
                       'hiphop': 7,'latin': 8,'dance': 9,'middleeastern': 10,'reggae': 11,'neworleans': 12,
                       'punk': 13,'pop': 14,'soul': 15,'highlife': 16,'afrocuban': 17}
+
+style_list = list(style2idx.keys())
 
 model = drum_generation_model()
 model.load_state_dict(torch.load('./models/17model_100.pt')) # 아직 가중치가 없어서 추가할 예정입니다. 모델구조와 가중치는 따로 수정할 수 있도록 해주시면 감사하겠습니다! 
@@ -108,7 +110,8 @@ def transcribe(audio_path, transcription_output):
     
     return dense_image, onset_image, transcription_output
 
-def generate(x):
+
+def generate(x, style):
     style_idx = torch.tensor([style2idx[style]], dtype=torch.long)
     x = torch.from_numpy(x).unsqueeze(0)
     
@@ -150,6 +153,7 @@ with gr.Blocks() as demo:
     
     
     gr.Markdown("""## Generation""")
+    style_radio = gr.Radio(choices=style_list, label="Style", value='rock')
     generate_button = gr.Button(value="Generate")
     
     gr.Markdown("""### Generation Result""")
@@ -165,6 +169,6 @@ with gr.Blocks() as demo:
     # 버튼 클릭 이벤트
     #
     run_button.click(fn=transcribe, inputs=[input_audio, transcription_output], outputs=[dense_image, onset_image, transcription_output])
-    generate_button.click(fn=generate, inputs=transcription_output, outputs=[generated_image, midi_file, wav_file])
+    generate_button.click(fn=generate, inputs=[transcription_output, style_radio], outputs=[generated_image, midi_file, wav_file])
 
     demo.launch(debug=False, share=args.share)
