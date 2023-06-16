@@ -38,6 +38,7 @@ pip install -r requirements.txt
 
 - models/onset_model_noQZ.pt
 - models/velocity_model_noQZ.pt
+- models/17model_100.pt
 
 
 

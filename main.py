@@ -88,13 +88,21 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--share', type=str2bool, default='False')
 args = parser.parse_args()
 
-demo = gr.Interface(fn=predict,
-                    inputs=gr.Audio(type="filepath"),
-                    outputs=[gr.Image(label="densed_drumroll"),
-                             gr.Image(label="onset_pred_cleaned"),
-                             gr.Number(label="Prediction time (s)")],
-                    examples=example_list,
-                    cache_examples=False
-                    )
+with gr.Blocks() as demo:
+    gr.Markdown("""# Vocal Percussion to Drum""")
+    gr.Markdown("""## Transcription""")
+    input_audio = gr.Audio(type="filepath")
+    examples = gr.Examples(example_list, label="Examples", inputs=input_audio)
+    run_button = gr.Button(value="Transcribe")
+    
+    gr.Markdown("""### Transcription Results""")
+    with gr.Row():
+        dense_image = gr.Image(label="densed_drumroll")
+        onset_image = gr.Image(label="onset_pred_cleaned")
+    
+    time_label = gr.Number(label="Prediction time (s)")
+    gr.Markdown("""## Generation""")
+    
+    run_button.click(fn=predict, inputs=input_audio, outputs=[dense_image, onset_image, time_label])
 
-demo.launch(debug=False, share=args.share)
+    demo.launch(debug=False, share=args.share)
