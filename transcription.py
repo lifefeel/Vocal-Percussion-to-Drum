@@ -96,11 +96,15 @@ def plt_imshow(npimg, title=None, filename=None):
   plt.imshow(npimg, aspect='auto', origin='lower', interpolation='nearest')
   if title is not None:
     plt.title(title)
-    plt.savefig(f'transcribed_sample_results/{title}_{filename}.png')
+    output_path = f'transcribed_sample_results/{title}_{filename}.png'
+    plt.savefig(output_path)
+    print('saved:', output_path)
+    
   
 
 if __name__ == "__main__":
   args = get_argument_parser().parse_args()
+  print('input audio:', args.wav_path)
   audio_path = Path(args.wav_path)
   sample_first, sr = torchaudio.load(audio_path)
 
