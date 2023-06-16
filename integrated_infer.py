@@ -14,6 +14,16 @@ from model import drum_generation_model
 
 from model_zoo import RNNModel_onset, RNNModel_velocity
 
+from midi2audio import FluidSynth
+
+# FluidSynth 패키지를 사용하여 MIDI 파일을 WAV로 변환하는 함수
+def midi_to_wav(midi_file, output_wav):
+    # FluidSynth 객체 생성
+    fluidsynth = FluidSynth()
+    
+    # MIDI를 WAV로 변환
+    fluidsynth.midi_to_audio(midi_file, output_wav)
+        
 class SpecConverter():
   def __init__(self, sr=44100, n_fft=2048, hop_length=1024, n_mels=128, fmin=0, fmax=None):
     self.sr = sr
@@ -199,5 +209,7 @@ if __name__ == "__main__":
   '''
   midi = get_nine_midi(onset = onset_outputs, val = vel_outputs, bpm = bpm ) 
   #결과값을 midi로 저장합니다. 모델이 예측한걸 그대로 넣어주시면 됩니다. bpm의 경우 기본 120입니다.
-  midi.write('transcribed_sample_results/test.mid')  
+  midi_file = 'transcribed_sample_results/test.mid'
+  midi.write(midi_file)  
  
+  midi_to_wav(midi_file, midi_file.replace('.mid', '.wav'))

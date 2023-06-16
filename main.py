@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 import gradio as gr
+from midi2audio import FluidSynth
 import numpy as np
 import torch
 import torchaudio
@@ -20,7 +21,16 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
     
+
+# FluidSynth 패키지를 사용하여 MIDI 파일을 WAV로 변환하는 함수
+def midi_to_wav(midi_file, output_wav):
+    # FluidSynth 객체 생성
+    fluidsynth = FluidSynth()
     
+    # MIDI를 WAV로 변환
+    fluidsynth.midi_to_audio(midi_file, output_wav)
+        
+            
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 example_list = [
@@ -96,7 +106,7 @@ def transcribe(audio_path, transcription_output):
     # return pred_labels_and_probs, pred_time
     transcription_output = densed_drumroll[:,:64]
     
-    return dense_image, onset_image, pred_time, transcription_output
+    return dense_image, onset_image, transcription_output
 
 def generate(x):
     style_idx = torch.tensor([style2idx[style]], dtype=torch.long)
@@ -117,7 +127,10 @@ def generate(x):
     saved_midi = 'transcribed_sample_results/test.mid'
     midi.write(saved_midi)
     
-    return saved_image, gr.File.update(value=saved_midi, visible=True)
+    wav_file = saved_midi.replace('.mid', '.wav')
+    midi_to_wav(saved_midi, wav_file)
+    
+    return saved_image, gr.File.update(value=saved_midi, visible=True), gr.Audio.update(value=wav_file, visible=True)
     
 parser = argparse.ArgumentParser()
 parser.add_argument('--share', type=str2bool, default='False')
@@ -130,23 +143,28 @@ with gr.Blocks() as demo:
     examples = gr.Examples(example_list, label="Examples", inputs=input_audio)
     run_button = gr.Button(value="Transcribe")
     
-    gr.Markdown("""### Transcription Results""")
+    gr.Markdown("""### Transcription Result""")
     with gr.Row():
         dense_image = gr.Image(label="densed_drumroll")
         onset_image = gr.Image(label="onset_pred_cleaned")
     
-    time_label = gr.Number(label="Prediction time (s)")
+    
     gr.Markdown("""## Generation""")
     generate_button = gr.Button(value="Generate")
-    generated_image = gr.Image(label="generated_drumroll")
-    midi_file = gr.File(label="generated_midi", visible=False)
+    
+    gr.Markdown("""### Generation Result""")
+    with gr.Row():
+        generated_image = gr.Image(label="generated_drumroll")
+        with gr.Column():
+            midi_file = gr.File(label="generated_midi")
+            wav_file = gr.Audio(label="generated_wav")
     
     transcription_output = gr.State()
     
     #
     # 버튼 클릭 이벤트
     #
-    run_button.click(fn=transcribe, inputs=[input_audio, transcription_output], outputs=[dense_image, onset_image, time_label, transcription_output])
-    generate_button.click(fn=generate, inputs=transcription_output, outputs=[generated_image, midi_file])
+    run_button.click(fn=transcribe, inputs=[input_audio, transcription_output], outputs=[dense_image, onset_image, transcription_output])
+    generate_button.click(fn=generate, inputs=transcription_output, outputs=[generated_image, midi_file, wav_file])
 
     demo.launch(debug=False, share=args.share)
