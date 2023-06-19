@@ -7,7 +7,7 @@ import torch
 import torchaudio
 from timeit import default_timer as timer
 from infer_util import get_nine_midi, plot_pianoroll
-from model import drum_generation_model
+from model import drum_gen_model
 from model_zoo import RNNModel_onset, RNNModel_velocity
 from transcription import Dense_onsets, SpecConverter, denoise, high_freq_content, plt_imshow, reducing_time_resolution
 
@@ -56,8 +56,8 @@ style2idx = {'gospel': 0, 'blues': 1,'afrobeat': 2,'jazz': 3,'country': 4,'funk'
 
 style_list = list(style2idx.keys())
 
-model = drum_generation_model()
-model.load_state_dict(torch.load('./models/17model_100.pt')) # 아직 가중치가 없어서 추가할 예정입니다. 모델구조와 가중치는 따로 수정할 수 있도록 해주시면 감사하겠습니다! 
+model = drum_gen_model()
+model.load_state_dict(torch.load('./models/25model_100.pt')) # 아직 가중치가 없어서 추가할 예정입니다. 모델구조와 가중치는 따로 수정할 수 있도록 해주시면 감사하겠습니다! 
 model.eval()
 
 spec_converter = SpecConverter(sr=44100, n_fft=512, hop_length=128, n_mels=128)
@@ -121,11 +121,13 @@ def generate(x, style):
         # input이 들어와야합니다. input은 저희 경우 [1, 64, 4]입니다 그래서 아마 지우 형꺼는 [1, 4 ,64라 permute 해야합니다.]
 
     onset_pred = (onset_outputs > 0.5).float()
-    
+    vel_outputs = torch.where(vel_outputs > 60/127, vel_outputs, torch.zeros_like(vel_outputs))
+    vel_onset = torch.where(vel_outputs > 60/127, torch.ones_like(vel_outputs), torch.zeros_like(vel_outputs))
+
     saved_image = 'transcribed_sample_results/das.png'
-    plot_pianoroll(x_reshape.permute(0,2,1), vel_outputs * onset_pred, out_file_pth=saved_image) 
+    plot_pianoroll(x_reshape.permute(0,2,1), vel_outputs, out_file_pth=saved_image) 
     
-    midi = get_nine_midi(onset = onset_outputs, val = vel_outputs, bpm = bpm ) 
+    midi = get_nine_midi(onset = vel_onset, val = vel_outputs, bpm = bpm) 
     #결과값을 midi로 저장합니다. 모델이 예측한걸 그대로 넣어주시면 됩니다. bpm의 경우 기본 120입니다.
     saved_midi = 'transcribed_sample_results/test.mid'
     midi.write(saved_midi)
