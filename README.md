@@ -12,6 +12,9 @@ https://github.com/lifefeel/Vocal-Percussion-to-Drum/assets/38556/c7c16f03-a79a-
 - 김대웅
 - 이정필
 
+## 발표영상
+https://www.youtube.com/watch?v=QQFge3GR4yg
+
 ## 환경
 
 ### 일반
