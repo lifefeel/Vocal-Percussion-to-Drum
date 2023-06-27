@@ -1,5 +1,9 @@
 # Vocal Percussion to Drum
 
+
+https://github.com/lifefeel/Vocal-Percussion-to-Drum/assets/38556/c7c16f03-a79a-4aa2-9c8d-4596b0b58578
+
+
 딥러닝 기반 음악생성 과목 프로젝트 시연 코드입니다.
 
 ## 팀원
